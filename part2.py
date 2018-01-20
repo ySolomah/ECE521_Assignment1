@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
 import part1
+import sys
 
 np.random.seed(521)
 Data = np.linspace(1.0 , 10.0 , num =100) [:, np. newaxis]
@@ -18,12 +19,22 @@ sess = tf.Session()
 
 guesses = []
 
-def getResponsibilities(pairwise_matrix, k):
+def getResponsibilities(data_matrix, target_matrix, data_valid, target_valid, pairwise_matrix, k):
+	print("Top : " + str(k))
 	temp_array = tf.transpose(tf.reciprocal(result), perm=[2, 3, 0, 1])
-	responsibilities_array = [0] * temp_array.shape[1]
+	temp_array_shape = (sess.run(temp_array)).shape
+	print("Temp array shape: " + str(temp_array_shape))
+	responsibilities_array = [0] * temp_array_shape[3]
+	print("Resp array shape: " + (str(len(responsibilities_array))))
 	values, indices = tf.nn.top_k(temp_array, k)
-	for i in range(len(indicies)):
-		responsibilities_array[indicies[i]] = 1/k
+	values = sess.run(tf.reshape(values, [k]))
+	indices = sess.run(tf.reshape(indices, [k]))
+	print("Shape of values: " + str(values.shape))
+	print("Shape of indices: " + str(indices.shape))
+	print("Validation data: " + str(data_valid) + " valid target: " + str(target_valid))
+	for i in range(len(indices)):
+		print("Index: " + str(indices[i]) + " (casted as int): " + str(int(indices[i])) + " with dataVal: " + str(data_matrix[int(indices[i])]) + " with target: " + str(target_matrix[(indices[i])]))
+		responsibilities_array[int(indices[i])] = 1/k
 	return(responsibilities_array)
 
 
@@ -37,15 +48,16 @@ test_mse = {}
 for k in [1, 3, 5, 50]:
 	validation_mse[k] = 0
 	for i in range(len(validData)):
-		validDataTensor = tf.convert_to_tensor(validData[0].astype(np.float32))
+		validDataTensor = tf.convert_to_tensor(validData[i].astype(np.float32))
 		result = part1.pairwise_square_euclid_distance(validDataTensor, trainDataTensor)
-		resp = getResponsibilities(result, k)
+		resp = getResponsibilities(trainData, trainTarget, validData[i], validTarget[i], result, k)
 		guess = 0
-		for j, weight in enumerate(responsibilities_array):
+		for j, weight in enumerate(resp):
 			guess += weight * trainTarget[j]
 		validation_mse[k] += (1/len(validData)) * (guess - validTarget[i])**2
 
 print(validation_mse)
+sys.exit()
 
 #print(validDataTensor.get_shape())
 print(result.shape)
