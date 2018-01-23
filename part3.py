@@ -5,6 +5,7 @@ import part1
 import part2
 import sys
 import operator
+import matplotlib.pyplot as plt
 
 sess = tf.Session()
 
@@ -40,8 +41,35 @@ test_tar = test_tar[0:5]
 
 validation_mse = {}
 predict_labels = {}
+k_accuracy = {}
 
-for k in [1, 3, 5, 50]:
+for k in [1, 5, 10, 25, 50, 100, 200]:
+	k_accuracy[k] = 0
+	print("K NOW: " + str(k))
+	validation_mse[k] = 0
+	testResp = part2.getTotalResponsibilities(train_data, test_data, valid_data, train_tar, test_tar, valid_tar, k)
+	for key, resp in testResp.items():
+		for i in range(6):
+			predict_labels[i] = 0
+		guess = 0
+		for j, weight in enumerate(resp):
+			if(weight > 0):
+				predict_labels[train_tar[j]] += 1
+				print("shape of train_data[j]: " + str(train_data[j].shape))
+		print("Predictions for image " + str(key) + " are: ")
+		max_entry = max(predict_labels.items(), key=operator.itemgetter(1))
+		print(str(max_entry[0]) + " with total count: " + str(max_entry[1]) + " remainder: " + str(k-max_entry[1]))
+		print("Correct answer: " + str(valid_tar[key]) + "\n")
+		if(max_entry[0] == valid_tar[key]):
+			k_accuracy[k] += 1
+
+print("VALIDATION K")
+print(k_accuracy)
+sys.exit()
+
+k_valid = 0
+
+for k in [k_valid]:
 	print("K NOW: " + str(k))
 	validation_mse[k] = 0
 	testResp = part2.getTotalResponsibilities(train_data, valid_data, test_data, train_tar, valid_tar, test_tar, k)
@@ -53,6 +81,7 @@ for k in [1, 3, 5, 50]:
 			guess += weight * train_tar[j]
 			if(weight > 0):
 				predict_labels[train_tar[j]] += 1
+				print("shape of train_data[j]: " + str(train_data[j].shape))
 		print("Predictions for image " + str(key) + " are: ")
 		max_entry = max(predict_labels.items(), key=operator.itemgetter(1))
 		print(str(max_entry[0]) + " with total count: " + str(max_entry[1]) + " remainder: " + str(k-max_entry[1]))
