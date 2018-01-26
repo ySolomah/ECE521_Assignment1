@@ -5,7 +5,7 @@ import part1
 import part2
 import sys
 import operator
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 sess = tf.Session()
 
@@ -36,14 +36,14 @@ args = parser.parse_args()
 
 train_data, valid_data, test_data, train_tar, valid_tar, test_tar = data_segmentation(args.input_data, args.input_target, 0)
 
-test_data = test_data[0:5]
-test_tar = test_tar[0:5]
+#test_data = test_data[0:5]
+#test_tar = test_tar[0:5]
 
 validation_mse = {}
 predict_labels = {}
 k_accuracy = {}
 
-for k in [1, 5, 10, 25, 50, 100, 200]:
+for k in [1, 5, 10, 25]:
 	k_accuracy[k] = 0
 	print("K NOW: " + str(k))
 	validation_mse[k] = 0
